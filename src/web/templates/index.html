@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주모키 주식 분석</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .search-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+    <div class="text-center w-full max-w-2xl px-4">
+        <h1 class="text-5xl font-bold text-gray-800 mb-8 tracking-tight">📈 Joomoki Stock</h1>
+        <p class="text-gray-500 mb-8 text-lg">초보자를 위한 AI 기술적 분석 대시보드</p>
+        
+        <div class="relative group">
+            <div class="absolute -inset-1 bg-gradient-to-r from-pink-600 to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+            <div class="relative bg-white rounded-lg p-2 flex shadow-xl">
+                <input type="text" id="searchInput" 
+                    class="w-full p-4 text-xl outline-none rounded-l-lg text-gray-700 placeholder-gray-400" 
+                    placeholder="종목명 또는 코드 입력 (예: 삼성전자)"
+                    autofocus>
+                <button onclick="search()" class="bg-purple-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-purple-700 transition">
+                    검색
+                </button>
+            </div>
+            <!-- 자동완성 결과 -->
+            <div id="searchResults" class="absolute w-full bg-white mt-2 rounded-lg shadow-lg z-10 hidden text-left overflow-hidden">
+                <!-- JS로 채워짐 -->
+            </div>
+        </div>
+        
+        <div class="mt-12 flex justify-center gap-4 text-sm text-gray-400">
+            <span>#골든크로스</span>
+            <span>#이동평균선</span>
+            <span>#RSI</span>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('searchInput');
+        const resultsDiv = document.getElementById('searchResults');
+
+        input.addEventListener('input', async (e) => {
+            const query = e.target.value;
+            if (query.length < 1) {
+                resultsDiv.classList.add('hidden');
+                return;
+            }
+
+            const res = await fetch(`/search?q=${query}`);
+            const data = await res.json();
+
+            resultsDiv.innerHTML = '';
+            if (data.length > 0) {
+                resultsDiv.classList.remove('hidden');
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = "p-4 hover:bg-gray-50 cursor-pointer border-b last:border-0 transition";
+                    div.innerHTML = `<span class="font-bold text-gray-800">${item.name}</span> <span class="text-gray-400 text-sm ml-2">${item.code}</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded ml-auto float-right text-gray-600">${item.market}</span>`;
+                    div.onclick = () => window.location.href = `/stock/${item.code}`;
+                    resultsDiv.appendChild(div);
+                });
+            } else {
+                resultsDiv.classList.add('hidden');
+            }
+        });
+
+        function search() {
+            // 엔터나 버튼 클릭 시 첫 번째 결과로 이동하거나 추가 로직 구현
+            const query = input.value;
+            if(query) {
+                // 단순하게 api 호출해서 1개 있으면 이동, 아니면 경고 등
+                fetch(`/search?q=${query}`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.length > 0) {
+                        window.location.href = `/stock/${data[0].code}`;
+                    } else {
+                        alert("검색 결과가 없습니다.");
+                    }
+                });
+            }
+        }
+        
+        input.addEventListener("keypress", function(event) {
+          if (event.key === "Enter") {
+            search();
+          }
+        });
+    </script>
+</body>
+</html>
