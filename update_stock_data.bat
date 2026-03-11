@@ -29,11 +29,12 @@ if %errorlevel% neq 0 (
 
 echo.
 echo ==============================================
-echo [2/3] D:\joomoki_PJ 의 index.html 을 D:\DataStock 에 배포합니다...
+echo [2/3] D:\joomoki_PJ 의 웹 파일들(index.html, data 폴더)을 D:\DataStock 에 배포합니다...
 
+xcopy /E /Y /I D:\joomoki_PJ\data D:\DataStock\data > nul
 copy /Y D:\joomoki_PJ\index.html D:\DataStock\index.html
 if %errorlevel% neq 0 (
-    echo ❌ [오류] index.html 복사 중 오류가 발생했습니다.
+    echo ❌ [오류] 배포 중 오류가 발생했습니다.
     goto end
 )
 
