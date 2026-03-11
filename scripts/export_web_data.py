@@ -111,10 +111,14 @@ def export_data():
         }
         
         # 3. 파일 저장
-        output_dir = os.path.join('D:\\', 'DataStock', 'data')
-        os.makedirs(output_dir, exist_ok=True)
+        dist_dir = os.path.join('D:\\', 'DataStock', 'data')
+        dev_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
         
-        output_file = os.path.join(output_dir, 'stock_data.js')
+        os.makedirs(dist_dir, exist_ok=True)
+        os.makedirs(dev_dir, exist_ok=True)
+        
+        dist_file = os.path.join(dist_dir, 'stock_data.js')
+        dev_file = os.path.join(dev_dir, 'stock_data.js')
         
         from decimal import Decimal
         class DecimalEncoder(json.JSONEncoder):
@@ -126,10 +130,16 @@ def export_data():
         json_str = json.dumps(output_data, ensure_ascii=False, indent=2, cls=DecimalEncoder)
         js_content = f"const stockData = {json_str};"
 
-        with open(output_file, 'w', encoding='utf-8') as f:
+        # DataStock 폴더에 배포
+        with open(dist_file, 'w', encoding='utf-8') as f:
             f.write(js_content)
             
-        print(f"데이터 저장 완료: {output_file}")
+        # 로컬 테스트용 폴더에 배포
+        with open(dev_file, 'w', encoding='utf-8') as f:
+            f.write(js_content)
+            
+        print(f"데이터 저장 완료(배포용): {dist_file}")
+        print(f"데이터 저장 완료(개발용): {dev_file}")
         print(f"- 전체 종목: {len(stocks_data)}개")
             
     except Exception as e:
