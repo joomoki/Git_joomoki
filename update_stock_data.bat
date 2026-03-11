@@ -61,14 +61,17 @@ git add -A
 git diff --cached --quiet
 if %errorlevel% equ 0 (
     echo [정보] 변경 사항 없음, 커밋 생략
-) else (
-    git commit -m "Auto update: stock data, risk models, UI"
-    git push origin HEAD
-    if %errorlevel% neq 0 (
-        echo [오류] D:\joomoki_PJ GitHub 푸시 중 오류가 발생했습니다.
-        goto end
-    )
+    goto skip_joomoki_push
 )
+
+git commit -m "Auto update: stock data, risk models, UI"
+git push origin HEAD
+if %errorlevel% neq 0 (
+    echo ❌ [오류] D:\joomoki_PJ GitHub 푸시 중 오류가 발생했습니다.
+    goto end
+)
+
+:skip_joomoki_push
 
 echo.
 echo ✅ [성공] 데이터 갱신, UI 배포, GitHub 푸시 작업이 모두 완료되었습니다!
