@@ -195,6 +195,178 @@ const DISCOVERY_MODELS = [
 
             return scored;
         }
+    },
+
+    // ── 두 번째 모델: 전쟁/지정학 리스크 수혜 발굴 ──
+    {
+        id: 'geo_risk',
+        name: '전쟁·지정학 리스크 수혜 발굴',
+        icon: 'fa-globe-asia',
+        badge: '리스크모델',
+        market: 'kr',
+        color: '#fd7e14',
+        tagline: 'WTI·금·방산ETF 2σ 변동성 감지 → 수혜 섹터 종목 발굴',
+        description: `
+            <h6 class="mb-3" style="color:#fd7e14;">🌐 모델 개요</h6>
+            <p>글로벌 지정학적 리스크 자산(WTI 원유, 금 선물, 미 방산ETF ITA)의 변동성이
+            과거 20일 평균 대비 <strong>2σ(표준편차) 이상</strong> 급등하는 시점을 감지하고,
+            수혜가 예상되는 국내 방산·에너지·해운·소재 섹터 종목을 자동 발굴합니다.</p>
+
+            <h6 class="text-warning mb-2 mt-4">🔎 감시 자산 및 감지 로직</h6>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3" style="background:rgba(253,126,20,0.07); border:1px solid rgba(253,126,20,0.2)">
+                        <div class="fw-bold mb-2" style="color:#fd7e14;"><i class="fas fa-satellite-dish me-1"></i> 감시 지표</div>
+                        <ul class="mb-0 small text-muted" style="padding-left:1.2rem">
+                            <li>🛢️ WTI 원유 선물 (CL=F) — 유가 급등·급락</li>
+                            <li>🪙 금 선물 (GC=F) — 안전자산 수요 폭발</li>
+                            <li>🛡️ 미 방산 ETF (ITA) — 전쟁 리스크 선행 지표</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3" style="background:rgba(112,0,255,0.07); border:1px solid rgba(112,0,255,0.2)">
+                        <div class="fw-bold text-secondary mb-2"><i class="fas fa-chart-bar me-1"></i> 2σ 감지 알고리즘</div>
+                        <ul class="mb-0 small text-muted" style="padding-left:1.2rem">
+                            <li>최근 20거래일 수익률 → μ(평균), σ(표준편차) 계산</li>
+                            <li>최근 1일 수익률 Z-score = (r - μ) / σ</li>
+                            <li>|Z| ≥ 2.0 → 경보 발동 / |Z| ≥ 3 → HIGH / |Z| ≥ 4 → EXTREME</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="text-warning mb-2 mt-3">⚙️ 수혜 섹터 매핑</h6>
+            <div class="row g-2 mb-3">
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-2 rounded" style="background:rgba(253,126,20,0.08); border:1px solid rgba(253,126,20,0.2)">
+                        <div style="color:#fd7e14;" class="fw-bold">🛡️ 방산</div>
+                        <div class="text-muted small">ITA 경보 시</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-2 rounded" style="background:rgba(255,193,7,0.08); border:1px solid rgba(255,193,7,0.2)">
+                        <div class="text-warning fw-bold">⚡ 에너지</div>
+                        <div class="text-muted small">WTI 경보 시</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-2 rounded" style="background:rgba(0,242,255,0.08); border:1px solid rgba(0,242,255,0.2)">
+                        <div class="text-primary fw-bold">🚢 해운</div>
+                        <div class="text-muted small">WTI/ITA 시</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-2 rounded" style="background:rgba(0,255,157,0.08); border:1px solid rgba(0,255,157,0.2)">
+                        <div class="text-success fw-bold">⛏️ 소재</div>
+                        <div class="text-muted small">GOLD 경보 시</div>
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="text-warning mb-2 mt-3">📊 리스크 현황</h6>
+            <div id="geo-risk-algo-status" class="p-3 rounded-3" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08);">
+                <div class="text-muted small">데이터 로딩 중...</div>
+            </div>
+        `,
+        run: function (allStocks) {
+            // geo_risk_data.js 데이터 기반 발굴
+            if (typeof geoRiskData === 'undefined') {
+                return [];
+            }
+
+            const geo = geoRiskData;
+            const overall = geo.overall_risk || {};
+            const sectors = geo.beneficiary_sectors || [];
+
+            // 알고리즘 현황 패널 업데이트
+            const statusEl = document.getElementById('geo-risk-algo-status');
+            if (statusEl) {
+                const levelColors = { NORMAL: '#28a745', MODERATE: '#ffc107', HIGH: '#fd7e14', EXTREME: '#dc3545', UNKNOWN: '#6c757d' };
+                const lc = levelColors[overall.level] || '#adb5bd';
+                const assets = geo.assets || {};
+                const assetHtml = Object.entries(assets).map(([k, a]) => {
+                    if (!a || a.error) return `<span class="badge me-1" style="background:rgba(108,117,125,0.2); color:#6c757d;">${k}: 데이터없음</span>`;
+                    const ac = levelColors[a.alert_level] || '#adb5bd';
+                    return `<span class="badge me-1" style="background:${ac}22; color:${ac}; border:1px solid ${ac}44;">
+                        ${a.icon || ''} ${k}: Z=${a.z_score} (${a.alert_level})
+                    </span>`;
+                }).join('');
+                statusEl.innerHTML = `
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <span class="badge" style="background:${lc}22; color:${lc}; border:1px solid ${lc}44; font-size:0.9rem; padding:6px 14px;">
+                            전체 리스크: ${overall.level}
+                        </span>
+                        <span class="text-muted small">경보 자산: ${overall.alert_count}개 | 기준: |Z| ≥ ${geo.sigma_threshold}</span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-1">${assetHtml}</div>
+                    <div class="text-muted small mt-2">갱신: ${geo.generated_at || '-'}</div>
+                `;
+            }
+
+            // sectors → stocks 펼치기
+            const stockCodeSet = new Set();
+            const sectorTagMap = {}; // code → sector name
+            sectors.forEach(sec => {
+                (sec.stocks || []).forEach(gs => {
+                    sectorTagMap[gs.code] = { sector: sec.sector, icon: sec.icon, reason: sec.reason };
+                });
+            });
+
+            if (Object.keys(sectorTagMap).length === 0) return [];
+
+            // allStocks에서 해당 코드 찾아 점수 부여
+            const results = [];
+            allStocks.forEach(s => {
+                const tag = sectorTagMap[s.code];
+                if (!tag) return;
+
+                const analysis = s.analysis || {};
+                const aiScore = analysis.score || 0;
+                const per = analysis.per || 0;
+                const pbr = analysis.pbr || 0;
+
+                let change = 0;
+                const chartData = s.chart_data || [];
+                if (chartData.length >= 2) {
+                    const last = chartData[chartData.length - 1].close || 0;
+                    const prev = chartData[chartData.length - 2].close || 0;
+                    if (prev > 0) change = ((last - prev) / prev) * 100;
+                }
+
+                // 발굴 점수: AI점수 + 리스크 경보 강도
+                let score = Math.min(aiScore, 70);
+                const alertCount = overall.alert_count || 0;
+                if (alertCount >= 3) score += 30;
+                else if (alertCount === 2) score += 20;
+                else if (alertCount === 1) score += 12;
+
+                if (overall.level === 'EXTREME') score += 20;
+                else if (overall.level === 'HIGH') score += 12;
+                else if (overall.level === 'MODERATE') score += 6;
+
+                const reasons = {
+                    fundamental: per > 0 ? [`PER ${per.toFixed(1)}배`, pbr > 0 ? `PBR ${pbr.toFixed(2)}배` : ''].filter(Boolean) : [],
+                    technical: [`${tag.icon} ${tag.sector} 섹터`, tag.reason],
+                    risk: overall.active ? [`리스크 발동: ${(overall.risk_types || []).join(', ')}`] : ['경보 미발동 (기본 표시)']
+                };
+
+                results.push({
+                    ...s,
+                    ai_score: aiScore,
+                    per, pbr,
+                    change_rate: change,
+                    discovery_score: Math.min(score, 100),
+                    reasons,
+                    _geo_sector: tag.sector,
+                    _geo_reason: tag.reason
+                });
+            });
+
+            return results
+                .sort((a, b) => b.discovery_score - a.discovery_score)
+                .slice(0, 15);
+        }
     }
 ];
 
