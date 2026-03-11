@@ -468,7 +468,8 @@ def export_data():
         "us_stocks": []   # To be populated by chunks
     }
     
-    data_dir = os.path.join('D:\\', 'DataStock', 'data')
+    # 변경: 로컬 개발 환경(joomoki_PJ)에 데이터를 저장하고, bat 스크립트를 통해 DataStock으로 배포
+    data_dir = os.path.join('D:\\', 'joomoki_PJ', 'data')
     os.makedirs(data_dir, exist_ok=True)
     
     base_file_path = os.path.join(data_dir, 'stock_data_base.js')
