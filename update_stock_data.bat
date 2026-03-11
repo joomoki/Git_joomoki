@@ -58,7 +58,7 @@ echo [joomoki_PJ 저장소 푸시]
 cd /d D:\joomoki_PJ
 git add index.html update_stock_data.bat
 git commit -m "Update UI and deployment script"
-git push origin main
+git push origin HEAD
 if %errorlevel% neq 0 (
     echo ❌ [오류] D:\joomoki_PJ GitHub 푸시 중 오류가 발생했습니다.
     goto end
