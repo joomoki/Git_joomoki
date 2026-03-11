@@ -111,7 +111,7 @@ def export_data():
         }
         
         # 3. 파일 저장
-        output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'stock_portal_joomoki', 'data')
+        output_dir = os.path.join('D:\\', 'DataStock', 'data')
         os.makedirs(output_dir, exist_ok=True)
         
         output_file = os.path.join(output_dir, 'stock_data.js')

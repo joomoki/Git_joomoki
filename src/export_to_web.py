@@ -468,8 +468,8 @@ def export_data():
         "us_stocks": []   # To be populated by chunks
     }
     
-    data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                               'stock_portal_joomoki', 'data')
+    data_dir = os.path.join('D:\\', 'DataStock', 'data')
+    os.makedirs(data_dir, exist_ok=True)
     
     base_file_path = os.path.join(data_dir, 'stock_data_base.js')
     with open(base_file_path, 'w', encoding='utf-8') as f:
