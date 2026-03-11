@@ -1,538 +1,334 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Stock Analysis Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent: #8b5cf6;
-            --up-color: #ef4444; /* 한국 주식 상승 색상 */
-            --down-color: #3b82f6; /* 한국 주식 하락 색상 */
-            --card-radius: 16px;
-        }
+    <title>JOOMOKI AI STOCK PORTAL</title>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', 'Noto Sans KR', sans-serif;
-        }
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Poppins:wght@400;600;700&display=swap"
+        rel="stylesheet">
 
-        body {
-            background: var(--bg-gradient);
-            background-attachment: fixed;
-            color: var(--text-primary);
-            min-height: 100vh;
-            line-height: 1.6;
-        }
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--glass-border);
-        }
+    <!-- Chart.js & Financial Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
 
-        h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #c4b5fd, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .status {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #10b981;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #10b981;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        /* Glassmorphism Cards */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--card-radius);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .glass-panel:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Top Picks Grid */
-        .top-picks-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .stock-card {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            height: 100%;
-        }
-
-        .stock-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .stock-name {
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .stock-code {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
-
-        .stock-price {
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin: 0.5rem 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .badge {
-            padding: 0.25rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .badge-market {
-            background: rgba(139, 92, 246, 0.2);
-            color: #c4b5fd;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-        }
-
-        .badge-up {
-            background: rgba(239, 68, 68, 0.15);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .badge-down {
-            background: rgba(59, 130, 246, 0.15);
-            color: #93c5fd;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-        
-        .stock-summary {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-top: 0.5rem;
-            flex-grow: 1;
-        }
-
-        /* Stats Row */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--glass-border);
-            text-align: center;
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 0.5rem;
-            border-radius: 8px;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.7rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-value {
-            font-weight: 600;
-            font-size: 0.9rem;
-            font-family: 'Inter', sans-serif;
-        }
-
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        input[type="text"], select {
-            padding: 0.85rem 1.2rem;
-            border-radius: 12px;
-            border: 1px solid var(--glass-border);
-            background: rgba(0, 0, 0, 0.2);
-            color: var(--text-primary);
-            font-size: 1rem;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        input[type="text"] {
-            flex-grow: 1;
-        }
-
-        input[type="text"]:focus, select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        select option {
-            background: #1e293b;
-            color: var(--text-primary);
-        }
-
-        /* Table */
-        .table-container {
-            overflow-x: auto;
-            border-radius: var(--card-radius);
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(12px);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th, td {
-            padding: 1.2rem 1rem;
-            border-bottom: 1px solid var(--glass-border);
-            white-space: nowrap;
-        }
-
-        th {
-            background: rgba(0, 0, 0, 0.4);
-            font-weight: 600;
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        tbody tr {
-            transition: background-color 0.2s;
-        }
-
-        tbody tr:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .text-up { color: var(--up-color); font-weight: 600; }
-        .text-down { color: var(--down-color); font-weight: 600; }
-        
-        .error-message {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
-            padding: 2rem;
-            border-radius: var(--card-radius);
-            text-align: center;
-            display: none;
-            backdrop-filter: blur(10px);
-            margin-top: 2rem;
-        }
-
-        /* Scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        @media (max-width: 768px) {
-            .controls {
-                flex-direction: column;
-            }
-            .stats-row {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            <h1>AI Stock Analysis Dashboard</h1>
-            <div class="status">
-                <div class="status-dot"></div>
-                <span id="last-updated">데이터 로딩 중...</span>
-            </div>
-        </header>
-
-        <div id="error-container" class="error-message">
-            <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">❌ 데이터를 불러올 수 없습니다</h2>
-            <p>1. <code>D:\joomoki_PJ\update_stock_data.bat</code> 또는 <code>export_web_data.py</code>를 실행하여 최신 데이터를 생성해주세요.</p>
-            <p>2. 브라우저의 로컬 파일 보안 정책(CORS)으로 인해 데이터를 읽을 수 없을 수도 있습니다. Microsoft Edge 등에서 로컬 파일을 확인해주세요.</p>
-        </div>
-
-        <div id="main-content" style="display: none;">
-            <div class="section-title">
-                🏆 AI 추천 Top Picks 
-                <span id="top-picks-count" style="font-size: 1rem; color: var(--accent); margin-left: auto; background: rgba(139, 92, 246, 0.15); padding: 0.3rem 0.8rem; border-radius: 20px;"></span>
-            </div>
-            <div class="top-picks-grid" id="top-picks-container">
-                <!-- Top Picks Cards will be rendered here -->
-            </div>
-
-            <div class="section-title" style="margin-top: 3.5rem;">
-                📊 전체 종목 데이터
-            </div>
-            
-            <div class="controls">
-                <input type="text" id="search-input" placeholder="종목명 또는 코드 검색...">
-                <select id="market-filter">
-                    <option value="ALL">전체 시장 (ALL)</option>
-                    <option value="KOSPI">KOSPI</option>
-                    <option value="KOSDAQ">KOSDAQ</option>
-                </select>
-                <select id="pred-filter">
-                    <option value="ALL">AI 예측: 전체 (ALL)</option>
-                    <option value="UP">상승 예측 (UP)</option>
-                    <option value="DOWN">하락 예측 (DOWN)</option>
-                    <option value="HOLD">중립 추세 (HOLD)</option>
-                </select>
-            </div>
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>종목코드</th>
-                            <th>종목명</th>
-                            <th>시장</th>
-                            <th>섹터</th>
-                            <th style="text-align: right;">현재가</th>
-                            <th style="text-align: center;">AI 예측</th>
-                            <th style="text-align: right;">PER</th>
-                            <th style="text-align: right;">PBR</th>
-                            <th style="text-align: right;">시가총액(억)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="stocks-table-body">
-                        <!-- Table rows will be rendered here -->
-                    </tbody>
-                </table>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-brain me-2"></i>JOOMOKI PRO
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="#dashboard">??쒕낫??/a></li>
+                    <li class="nav-item"><a class="nav-link" href="#market-list">?쒖옣</a></li>
+                    <li class="nav-item"><a class="nav-link" href="history.html">異붿쿇?대젰</a></li>
+                    <li class="nav-item"><a class="nav-link" href="discovery.html">?뵮 AI諛쒓뎬</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#education">媛?대뱶</a></li>
+                </ul>
             </div>
         </div>
-    </div>
+    </nav>
 
-    <!-- DataStock 환경에 배포되었을 때 정상 인식되도록 상대경로 지정 -->
-    <!-- (주의: D:\joomoki_PJ 에서 로컬 직접 실행 시에는 오류가 날 수 있으며 DataStock 배포 후 확인 권장) -->
-    <script src="data/stock_data.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Check if stockData is loaded
-            if (typeof stockData === 'undefined') {
-                document.getElementById('error-container').style.display = 'block';
-                return;
-            }
+    <header class="hero-section text-center">
+        <div class="container">
+            <h1 class="hero-title">AI 湲곕컲 ?쒖옣 遺꾩꽍_</h1>
+            <div id="last-updated" class="badge badge-ai mb-4">?곗씠???낅뜲?댄듃 以?..</div>
+            <div>
+                <a href="#market-list" class="btn btn-ai me-2">?쒖옣 ?먯깋?섍린 <i class="fas fa-arrow-right ms-2"></i></a>
+                <a href="history.html" class="btn btn-outline-light me-2">?뱤 異붿쿇 ?대젰 遺꾩꽍</a>
+                <a href="discovery.html" class="btn btn-outline-light"
+                    style="border-color: rgba(0,242,255,0.5); color: #00f2ff;">?뵮 AI二쇱떇諛쒓뎬</a>
+            </div>
+        </div>
+    </header>
 
-            document.getElementById('main-content').style.display = 'block';
-            
-            // Format numbers with commas
-            const formatNumber = (num) => {
-                if (num === null || num === undefined) return '-';
-                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            };
+    <div class="container my-5" id="dashboard">
+        <!-- Top Picks Section (AI Recommendations) -->
+        <section id="top-picks" class="mb-5">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h2 class="section-title text-white"><i class="fas fa-robot text-primary"></i> AI 媛뺣젰 留ㅼ닔 異붿쿇
+                </h2>
+                <span class="badge badge-ai">?믪? ?좊ː??/span>
+            </div>
 
-            // Setup Header
-            document.getElementById('last-updated').innerText = `최종 업데이트: ${stockData.last_updated} (전체 ${formatNumber(stockData.total_stocks)}종목)`;
-            document.getElementById('top-picks-count').innerText = `${stockData.top_picks.length} 추천 종목`;
+            <div class="row g-4" id="top-picks-container">
+                <!-- JS will inject cards here -->
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">濡쒕뵫以?..</span>
+                    </div>
+                    <p class="mt-2 text-muted">?쒖옣 ?곗씠??遺꾩꽍 以?..</p>
+                </div>
+            </div>
+        </section>
 
-            // Render Top Picks
-            const topPicksContainer = document.getElementById('top-picks-container');
-            const topPicksHTML = stockData.top_picks.slice(0, 12).map(stock => {
-                const isUp = stock.analysis.prediction === 'UP';
-                const isDown = stock.analysis.prediction === 'DOWN';
-                const predBadgeClass = isUp ? 'badge-up' : (isDown ? 'badge-down' : '');
-                const priceColor = isUp ? 'text-up' : (isDown ? 'text-down' : '');
-                
-                return `
-                    <div class="glass-panel stock-card">
-                        <div class="stock-header">
-                            <div>
-                                <div class="stock-name">${stock.name}</div>
-                                <div class="stock-code">${stock.code}</div>
-                            </div>
-                            <div class="badge badge-market">${stock.market}</div>
+        <!-- Market List Section -->
+        <section id="market-list" class="mb-5">
+            <div class="glass-card mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-5">
+                        <div class="d-flex flex-column flex-xl-row align-items-xl-end gap-2">
+                            <h2 class="section-title m-0 text-white text-nowrap"><i
+                                    class="fas fa-globe text-secondary"></i> ?쒖옣 媛쒖슂</h2>
+                            <span id="market-dates-display" class="text-muted ms-xl-2"
+                                style="font-size: 0.85rem; padding-bottom: 2px;"></span>
                         </div>
-                        <div class="stock-price ${priceColor}">₩${formatNumber(stock.price)}</div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                            <span class="badge ${predBadgeClass}">AI: ${stock.analysis.prediction || '-'}</span>
-                            <span class="badge" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1)">${stock.sector || '섹터 미분류'}</span>
-                        </div>
-                        <div class="stock-summary" title="${stock.analysis.summary || ''}">${stock.analysis.summary || '상세 분석 요약이 존재하지 않습니다.'}</div>
-                        <div class="stats-row">
-                            <div class="stat-item">
-                                <span class="stat-label">외인 순매수(주수)</span>
-                                <span class="stat-value ${stock.investor.frgn_net_buy > 0 ? 'text-up' : (stock.investor.frgn_net_buy < 0 ? 'text-down' : '')}">
-                                    ${formatNumber(stock.investor.frgn_net_buy)}
-                                </span>
+                    </div>
+                    <div class="col-md-7 text-md-end mt-3 mt-md-0">
+                        <div class="d-flex justify-content-md-end align-items-center gap-3">
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="market-type" id="btn-domestic"
+                                    autocomplete="off" checked>
+                                <label class="btn btn-outline-primary" for="btn-domestic">
+                                    援?궡 二쇱떇 <span id="count-domestic" class="badge bg-secondary ms-1">-</span>
+                                </label>
                             </div>
-                            <div class="stat-item">
-                                <span class="stat-label">기관/프로그램</span>
-                                <span class="stat-value ${stock.investor.pgm_net_buy > 0 ? 'text-up' : (stock.investor.pgm_net_buy < 0 ? 'text-down' : '')}">
-                                    ${formatNumber(stock.investor.pgm_net_buy)}
-                                </span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">PER / PBR</span>
-                                <span class="stat-value">
-                                    ${stock.financials.per ? stock.financials.per.toFixed(1) : '-'} / ${stock.financials.pbr ? stock.financials.pbr.toFixed(1) : '-'}
-                                </span>
+
+                            <div class="search-container">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="stats-search" class="search-input"
+                                    placeholder="醫낅ぉ肄붾뱶 ?먮뒗 醫낅ぉ紐?寃??..">
                             </div>
                         </div>
                     </div>
-                `;
-            }).join('');
-            topPicksContainer.innerHTML = topPicksHTML;
+                </div>
+            </div>
 
-            // Render All Stocks Table
-            const tbody = document.getElementById('stocks-table-body');
-            const searchInput = document.getElementById('search-input');
-            const marketFilter = document.getElementById('market-filter');
-            const predFilter = document.getElementById('pred-filter');
+            <div class="glass-card">
+                <div class="table-responsive">
+                    <table class="table table-dark-custom mb-0" id="stock-table">
+                        <thead>
+                            <tr>
+                                <th>醫낅ぉ紐?/ 肄붾뱶</th>
+                                <th onclick="handleSort('price')" style="cursor: pointer;">?꾩옱媛 <i id="sort-icon-price"
+                                        class="fas fa-sort ms-1" style="color: #6c757d;"></i></th>
+                                <th onclick="handleSort('change')" style="cursor: pointer;">?깅씫瑜?<i id="sort-icon-change"
+                                        class="fas fa-sort ms-1" style="color: #6c757d;"></i></th>
+                                <th onclick="handleSort('signal')" style="cursor: pointer;">?좏샇 <i id="sort-icon-signal"
+                                        class="fas fa-sort ms-1" style="color: #6c757d;"></i></th>
+                                <th onclick="handleSort('score')" style="cursor: pointer;">AI ?먯닔 <i id="sort-icon-score"
+                                        class="fas fa-sort ms-1" style="color: #6c757d;"></i></th>
+                                <th>吏??/th>
+                                <th>異붿꽭 (30??</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stock-list-body">
+                            <!-- JS will inject rows here -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination (Optional, simple implementation) -->
+                <div class="d-flex justify-content-center mt-3" id="pagination-controls">
+                    <!-- Dynamic pagination if needed, or simple 'Load More' -->
+                </div>
+            </div>
+        </section>
 
-            const renderTable = () => {
-                const searchTerm = searchInput.value.toLowerCase();
-                const marketVal = marketFilter.value;
-                const predVal = predFilter.value;
+        <!-- Education Section -->
+        <section id="education" class="mb-5">
+            <h2 class="section-title text-white mb-4"><i class="fas fa-lightbulb text-warning"></i> ?ъ옄 ?몄궗?댄듃</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="glass-card h-100">
+                        <h5 class="fw-bold text-primary mb-3"><i class="fas fa-chart-pie me-2"></i> PER (二쇨??섏씡鍮꾩쑉)</h5>
+                        <p class="text-muted small">二쇨?瑜?二쇰떦?쒖씠?듭쑝濡??섎늿 媛믪엯?덈떎. ??쓣?섎줉 ??됯??섏뼱 ?덉쓣 媛?μ꽦???믪뒿?덈떎. ?숈쥌 ?낃퀎 ?됯퇏怨?鍮꾧탳?대낫?몄슂.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="glass-card h-100">
+                        <h5 class="fw-bold text-secondary mb-3"><i class="fas fa-wave-square me-2"></i> RSI (?곷?媛뺣룄吏??
+                        </h5>
+                        <p class="text-muted small">怨쇰ℓ??怨쇰ℓ??援ш컙???먮떒?섎뒗 吏?쒖엯?덈떎. 70 ?댁긽?대㈃ 怨쇰ℓ??留ㅻ룄 怨좊젮), 30 ?댄븯?대㈃ 怨쇰ℓ??留ㅼ닔 湲고쉶)濡?                            ?댁꽍?⑸땲??</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="glass-card h-100">
+                        <h5 class="fw-bold text-success mb-3"><i class="fas fa-robot me-2"></i> AI ?먯닔</h5>
+                        <p class="text-muted small">湲곗닠??吏??MACD, 蹂쇰┛? 諛대뱶 ??? ??붾찘???곗씠?곕? 醫낇빀?섏뿬 AI媛 ?곗텧???ъ옄 留ㅻ젰???먯닔?낅땲??</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
 
-                let filtered = stockData.stocks.filter(stock => {
-                    const matchSearch = stock.name.toLowerCase().includes(searchTerm) || stock.code.includes(searchTerm);
-                    const matchMarket = marketVal === 'ALL' || stock.market === marketVal;
-                    const matchPred = predVal === 'ALL' || stock.analysis.prediction === predVal;
-                    return matchSearch && matchMarket && matchPred;
-                });
+    <!-- Modal for Stock Detail -->
+    <div class="modal fade" id="stockModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content text-white">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold">
+                        <span id="modalStockName">醫낅ぉ ?곸꽭</span>
+                        <span id="modalPrice" class="ms-3 fs-6 text-warning"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs border-bottom-0 mb-3" id="stockModalTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button
+                                class="nav-link active text-white bg-transparent border-0 border-bottom border-2 border-primary"
+                                id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis" type="button"
+                                role="tab" aria-selected="true">AI 遺꾩꽍</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-white bg-transparent border-0" id="financial-tab"
+                                data-bs-toggle="tab" data-bs-target="#financial" type="button" role="tab"
+                                aria-selected="false">?щТ?쒗몴</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-white bg-transparent border-0" id="news-tab"
+                                data-bs-toggle="tab" data-bs-target="#news" type="button" role="tab"
+                                aria-selected="false">?댁뒪</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-white bg-transparent border-0" id="info-tab"
+                                data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab"
+                                aria-selected="false">湲곗뾽 媛쒖슂</button>
+                        </li>
+                    </ul>
 
-                // Render top 500 for performance
-                const displayLimit = 500;
-                const willRender = filtered.slice(0, displayLimit);
+                    <div class="tab-content" id="stockModalTabContent">
+                        <!-- Analysis Tab -->
+                        <div class="tab-pane fade show active" id="analysis" role="tabpanel"
+                            aria-labelledby="analysis-tab">
+                            <p class="text-white mb-4" id="modalAnalysisSummary" style="line-height: 1.6;">遺꾩꽍 ?곗씠??濡쒕뵫
+                                以?..</p>
 
-                tbody.innerHTML = willRender.map(stock => {
-                    const isUp = stock.analysis.prediction === 'UP';
-                    const isDown = stock.analysis.prediction === 'DOWN';
-                    const predClass = isUp ? 'text-up' : (isDown ? 'text-down' : '');
-                    const predBadgeClass = isUp ? 'badge-up' : (isDown ? 'badge-down' : '');
-                    
-                    // 시가총액 변환 (억원)
-                    const marcapEok = stock.financials.market_cap ? Math.round(stock.financials.market_cap / 100000000) : null;
+                            <!-- Detailed Chart -->
+                            <div class="mb-4" style="height: 300px;">
+                                <canvas id="detailChart"></canvas>
+                            </div>
+                            <h6 class="text-muted mb-3"><i class="fas fa-signal me-2"></i>?ъ옄 ?좏샇</h6>
+                            <ul class="list-group mb-3" id="modalSignals">
+                                <!-- Signals injected by JS -->
+                            </ul>
+                        </div>
 
-                    return `
-                        <tr>
-                            <td style="color: var(--text-secondary); font-family: 'Inter', sans-serif;">${stock.code}</td>
-                            <td style="font-weight: 500">${stock.name}</td>
-                            <td><span class="badge badge-market" style="background: transparent; border: 1px solid rgba(139, 92, 246, 0.3)">${stock.market}</span></td>
-                            <td style="color: var(--text-secondary); font-size: 0.9rem;">${stock.sector || '-'}</td>
-                            <td style="font-weight: 600; text-align: right; font-family: 'Inter', sans-serif;">${formatNumber(stock.price)}</td>
-                            <td style="text-align: center;">
-                                <span class="badge ${predBadgeClass}" style="${!isUp && !isDown ? 'background: transparent; color: var(--text-secondary); border: 1px solid rgba(255,255,255,0.1);' : ''}">
-                                    ${stock.analysis.prediction || '-'}
-                                </span>
-                            </td>
-                            <td style="text-align: right; font-family: 'Inter', sans-serif;">${stock.financials.per ? stock.financials.per.toFixed(2) : '-'}</td>
-                            <td style="text-align: right; font-family: 'Inter', sans-serif;">${stock.financials.pbr ? stock.financials.pbr.toFixed(2) : '-'}</td>
-                            <td style="text-align: right; font-family: 'Inter', sans-serif;">${formatNumber(marcapEok)}</td>
-                        </tr>
-                    `;
-                }).join('');
+                        <!-- Financial Tab -->
+                        <div class="tab-pane fade" id="financial" role="tabpanel" aria-labelledby="financial-tab">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-striped table-hover rounded-3 overflow-hidden">
+                                    <tbody id="financial-table-body">
+                                        <!-- Financials injected by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
-                if (filtered.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 1.1rem;">검색 결과가 없습니다.</td></tr>`;
-                } else if (filtered.length > displayLimit) {
-                    tbody.innerHTML += `<tr><td colspan="9" style="text-align: center; padding: 1rem; color: var(--text-secondary);">총 ${formatNumber(filtered.length)}개 중 상위 ${displayLimit}개 항목만 표시됩니다. 종목명으로 검색해주세요.</td></tr>`;
-                }
-            };
+                        <!-- News Tab -->
+                        <div class="tab-pane fade" id="news" role="tabpanel" aria-labelledby="news-tab">
+                            <ul class="list-group list-group-flush" id="modalNewsList">
+                                <!-- News injected by JS -->
+                            </ul>
+                        </div>
 
-            // Event Listeners
-            searchInput.addEventListener('input', renderTable);
-            marketFilter.addEventListener('change', renderTable);
-            predFilter.addEventListener('change', renderTable);
+                        <!-- Info Tab -->
+                        <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="info-tab">
+                            <div class="p-3 bg-dark rounded-3"
+                                style="background-color: rgba(255,255,255,0.05) !important;">
+                                <h6 class="text-muted mb-3"><i class="fas fa-building me-2"></i>湲곗뾽 媛쒖슂</h6>
+                                <p class="text-white" id="modalDescription"
+                                    style="line-height: 1.7; white-space: pre-line;">湲곗뾽 ?뺣낫媛 ?놁뒿?덈떎.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1 small">
+                        <span class="text-muted">PER</span> <span id="modalPER">-</span>
+                    </div>
+                    <div class="d-flex justify-content-between small">
+                        <span class="text-muted">PBR</span> <span id="modalPBR">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
 
-            // Initial render
-            renderTable();
-        });
-    </script>
+
+
+    <!-- System Info Section -->
+    <div class="container mb-5">
+        <section id="system-info">
+            <div class="glass-card p-4">
+                <h4 class="text-white mb-4"><i class="fas fa-server text-info me-2"></i> ?쒖뒪???뺣낫 & ?곗씠??異쒖쿂</h4>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <h6 class="text-primary fw-bold"><i class="fas fa-database me-2"></i>?곗씠???섏쭛</h6>
+                        <p class="text-muted small">
+                            蹂??쒕퉬?ㅻ뒗 <strong>Python 諛깃렇?쇱슫???ㅽ겕由쏀듃</strong>媛 24?쒓컙 媛?숇릺硫??ㅼ떆媛꾩뿉 媛源앷쾶 ?곗씠?곕? ?섏쭛?⑸땲??<br><br>
+                            <span class="d-block">??<strong>援?궡 二쇱떇:</strong> Naver Finance (?щ·留? / KIS API</span>
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-success fw-bold"><i class="fas fa-brain me-2"></i>AI ?먯닔 ?곗텧 ?뚭퀬由ъ쬁</h6>
+                        <p class="text-muted small">
+                            湲곗닠??湲곕낯??遺꾩꽍 吏?쒕? 醫낇빀?섏뿬 0~100?먯쓽 ?ъ옄 留ㅻ젰?꾨? ?곗텧?⑸땲??<br><br>
+                            <span class="d-block mb-1">??<strong>湲곗닠??遺꾩꽍:</strong> RSI, ?대룞?됯퇏??MA) ?섎졃/?뺤궛, MACD, 蹂쇰┛? 諛대뱶
+                                ?꾩튂</span>
+                            <span class="d-block">??<strong>湲곕낯??遺꾩꽍:</strong> PER, PBR, EPS ?깆옣瑜?媛以묒튂 ?곸슜</span>
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-warning fw-bold"><i class="fas fa-network-wired me-2"></i>?쒖뒪??援ъ“</h6>
+                        <p class="text-muted small">
+                            ?곗씠?곕뒗 <strong>PostgreSQL DB</strong>????λ릺硫? 二쇨린?곸쑝濡?<strong>?뺤쟻 ???뚯씪(JS)</strong>濡?蹂?섎릺??                            諛고룷?⑸땲??<br><br>
+                            ?ъ슜?먮뒗 蹂꾨룄???쒕쾭 ?붿껌 ?湲??쒓컙 ?놁씠, 理쒖쟻?붾맂 ?뺤쟻 ?뚯씪???듯빐 利됱떆 ?곗씠?곕? 議고쉶?????덉뒿?덈떎.
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-top border-secondary">
+                    <p class="text-muted small mb-0"><i class="fas fa-check-circle text-success me-1"></i> ?꾩옱 ?쒖뒪???곹깭:
+                        <strong>?뺤긽 媛??以?/strong> (?곗씠???먮룞 媛깆떊)
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="text-center py-4 mt-5 border-top border-secondary text-muted small">
+        <p class="mb-0">&copy; 2026 JOOMOKI PRO. AI-Powered Analytics.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- STOCK_DATA_SCRIPTS_START -->
+    <script src="data/stock_data_base.js"></script>
+    <script src="data/stock_data_kr_1.js"></script>
+    <script src="data/stock_data_kr_2.js"></script>
+    <script src="data/stock_data_kr_3.js"></script>
+    <script src="data/stock_data_kr_4.js"></script>
+    <script src="data/stock_data_kr_5.js"></script>
+    <script src="data/stock_data_kr_6.js"></script>
+    <script src="data/stock_data_kr_7.js"></script>
+    <script src="data/stock_data_kr_8.js"></script>
+    <script src="data/stock_data_kr_9.js"></script>
+    <!-- STOCK_DATA_SCRIPTS_END -->
+    <script src="js/app.js"></script>
 </body>
+
 </html>
