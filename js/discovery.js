@@ -367,8 +367,292 @@ const DISCOVERY_MODELS = [
                 .sort((a, b) => b.discovery_score - a.discovery_score)
                 .slice(0, 15);
         }
+    },
+
+    // ── 세 번째 모델: 질병/팬데믹 언택트 수혜 발굴 ──
+    {
+        id: 'pandemic',
+        name: '질병·팬데믹 언택트 수혜 발굴',
+        icon: 'fa-virus-slash',
+        badge: '팬데믹모델',
+        market: 'kr',
+        color: '#20c997',
+        tagline: 'XLV·IBB·ARKK 변동성 + MFI 자금흐름 → 언택트·바이오 발굴',
+        description: `
+            <h6 class="mb-3" style="color:#20c997;">🦠 모델 개요</h6>
+            <p>미국 헬스케어(XLV)·바이오테크(IBB)·혁신(ARKK) ETF 변동성을 분석하고,
+            <strong>Money Flow Index(MFI)</strong>를 통해 피해 섹터(항공·여행)에서
+            수혜 섹터(바이오·언택트·물류·클라우드)로 자금이 이동하는 시점을 포착합니다.</p>
+
+            <h6 class="text-warning mb-2 mt-4">🔎 감시 자산 및 감지 로직</h6>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3" style="background:rgba(32,201,151,0.07); border:1px solid rgba(32,201,151,0.2)">
+                        <div class="fw-bold mb-2" style="color:#20c997;"><i class="fas fa-heartbeat me-1"></i> 수혜 ETF</div>
+                        <ul class="mb-0 small text-muted" style="padding-left:1.2rem">
+                            <li>🏥 XLV — 미국 헬스케어 ETF (상승 경보)</li>
+                            <li>🧬 IBB — 바이오테크 ETF (상승 경보)</li>
+                            <li>🚀 ARKK — 혁신/언택트 ETF (상승 경보)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3" style="background:rgba(220,53,69,0.07); border:1px solid rgba(220,53,69,0.2)">
+                        <div class="fw-bold text-danger mb-2"><i class="fas fa-plane-slash me-1"></i> 피해 ETF (이탈 지표)</div>
+                        <ul class="mb-0 small text-muted" style="padding-left:1.2rem">
+                            <li>✈️ XAR — 항공우주 ETF (하락 확인)</li>
+                            <li>MFI < 45 = 자금이탈 확인</li>
+                            <li>수혜 MFI > 55 + 피해 MFI < 45 = ROTATION</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="text-warning mb-2 mt-3">⚙️ 수혜 섹터</h6>
+            <div class="row g-2 mb-3">
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-2 rounded" style="background:rgba(32,201,151,0.08); border:1px solid rgba(32,201,151,0.2)">
+                        <div style="color:#20c997;" class="fw-bold">🧬 바이오</div><div class="text-muted small">진단·백신·제약</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-2 rounded" style="background:rgba(0,242,255,0.08); border:1px solid rgba(0,242,255,0.2)">
+                        <div class="text-primary fw-bold">💻 언택트</div><div class="text-muted small">플랫폼·게임·미디어</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-2 rounded" style="background:rgba(255,193,7,0.08); border:1px solid rgba(255,193,7,0.2)">
+                        <div class="text-warning fw-bold">📦 물류</div><div class="text-muted small">택배·배달·유통</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-2 rounded" style="background:rgba(112,0,255,0.08); border:1px solid rgba(112,0,255,0.2)">
+                        <div class="text-secondary fw-bold">☁️ 클라우드</div><div class="text-muted small">보안·IDC·통신</div>
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="text-warning mb-2 mt-3">📊 팬데믹 리스크 현황</h6>
+            <div id="pandemic-algo-status" class="p-3 rounded-3" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08);">
+                <div class="text-muted small">데이터 로딩 중...</div>
+            </div>
+        `,
+        run: function (allStocks) {
+            if (typeof pandemicData === 'undefined') return [];
+
+            const pd = pandemicData;
+            const risk = pd.pandemic_risk || {};
+            const sectors = pd.beneficiary_sectors || [];
+
+            // 알고리즘 현황 패널 업데이트
+            const statusEl = document.getElementById('pandemic-algo-status');
+            if (statusEl) {
+                const lc = { NORMAL: '#28a745', MODERATE: '#20c997', HIGH: '#ffc107', EXTREME: '#dc3545' };
+                const col = lc[risk.level] || '#adb5bd';
+                const assets = pd.assets || {};
+                const assetHtml = Object.entries(assets).map(([k, a]) => {
+                    if (!a || a.error) return `<span class="badge me-1" style="background:rgba(108,117,125,0.2);color:#6c757d;">${k}: 없음</span>`;
+                    const isDmg = a.is_damage;
+                    const alc = { NORMAL: '#28a745', MODERATE: '#ffc107', HIGH: '#fd7e14', EXTREME: '#dc3545' }[a.alert_level] || '#adb5bd';
+                    return `<span class="badge me-1" style="background:${alc}22;color:${alc};border:1px solid ${alc}44;">
+                        ${a.icon || ''} ${k}: Z=${a.z_score}${isDmg ? ' (피해)' : ''} MFI=${a.mfi}
+                    </span>`;
+                }).join('');
+                statusEl.innerHTML = `
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <span class="badge" style="background:${col}22;color:${col};border:1px solid ${col}44;font-size:0.9rem;padding:6px 14px;">
+                            팬데믹 리스크: ${risk.level}
+                        </span>
+                        <span class="badge" style="background:rgba(32,201,151,0.15);color:#20c997;border:1px solid rgba(32,201,151,0.3);">
+                            자금흐름: ${risk.money_flow_signal}
+                        </span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-1">${assetHtml}</div>
+                    <div class="text-muted small mt-2">갱신: ${pd.generated_at || '-'}</div>
+                `;
+            }
+
+            // 섹터 → stock 코드 매핑
+            const sectorTagMap = {};
+            sectors.forEach(sec => {
+                (sec.stocks || []).forEach(gs => {
+                    sectorTagMap[gs.code] = { sector: sec.sector, icon: sec.icon, reason: sec.reason };
+                });
+            });
+            if (Object.keys(sectorTagMap).length === 0) return [];
+
+            const risk_level = risk.level || 'NORMAL';
+            const results = [];
+            allStocks.forEach(s => {
+                const tag = sectorTagMap[s.code];
+                if (!tag) return;
+                const analysis = s.analysis || {};
+                const aiScore = analysis.score || 0;
+                const per = analysis.per || 0;
+                const pbr = analysis.pbr || 0;
+                let change = 0;
+                const cd = s.chart_data || [];
+                if (cd.length >= 2) {
+                    const last = cd[cd.length - 1].close || 0;
+                    const prev = cd[cd.length - 2].close || 0;
+                    if (prev > 0) change = ((last - prev) / prev) * 100;
+                }
+                let score = Math.min(aiScore, 65);
+                const bonusMap = { EXTREME: 35, HIGH: 25, MODERATE: 15, NORMAL: 5 };
+                score += bonusMap[risk_level] || 5;
+                if (risk.money_flow_signal === 'ROTATION') score += 10;
+                results.push({
+                    ...s,
+                    ai_score: aiScore, per, pbr, change_rate: change,
+                    discovery_score: Math.min(score, 100),
+                    reasons: {
+                        fundamental: per > 0 ? [`PER ${per.toFixed(1)}배`, pbr > 0 ? `PBR ${pbr.toFixed(2)}배` : ''].filter(Boolean) : [],
+                        technical: [`${tag.icon} ${tag.sector}`, tag.reason, `자금흐름: ${risk.money_flow_signal}`],
+                        risk: risk.active ? [`팬데믹 리스크 ${risk.level} 발동`] : ['경보 미발동 (기본 표시)']
+                    }
+                });
+            });
+            return results.sort((a, b) => b.discovery_score - a.discovery_score).slice(0, 15);
+        }
+    },
+
+    // ── 네 번째 모델: 반도체 SOX 급락 줍줍 ──
+    {
+        id: 'semi_dip',
+        name: '반도체 SOX 급락 줍줍',
+        icon: 'fa-microchip',
+        badge: '과매도반등',
+        market: 'kr',
+        color: '#6f42c1',
+        tagline: 'SOXX 5일 7% 급락 감지 → RSI 30 이하 반도체 과매도 추출 + 백테스트',
+        description: `
+            <h6 class="mb-3" style="color:#6f42c1;">📉 모델 개요</h6>
+            <p>글로벌 반도체 지수를 추종하는 <strong>SOXX ETF</strong>(SOX 지수 대리)가
+            최근 5거래일 내 <strong>7% 이상 하락</strong>할 때 경보를 발동합니다.
+            이 시점에 RSI가 30 이하로 떨어진 <strong>과매도 국내 반도체 종목</strong>을 발굴하고,
+            과거 유사 패턴에서의 평균 반등률(백테스트)도 함께 제공합니다.</p>
+
+            <h6 class="text-warning mb-2 mt-4">🔎 알고리즘 구성</h6>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3" style="background:rgba(111,66,193,0.07); border:1px solid rgba(111,66,193,0.2)">
+                        <div class="fw-bold mb-2" style="color:#6f42c1;"><i class="fas fa-satellite-dish me-1"></i> 트리거 조건</div>
+                        <ul class="mb-0 small text-muted" style="padding-left:1.2rem">
+                            <li>SOXX 5거래일 수익률 ≤ -7% → 경보 발동</li>
+                            <li>≤ -10% → HIGH / ≤ -15% → EXTREME</li>
+                            <li>미발동 시에도 RSI 과매도 종목 모니터링</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3" style="background:rgba(0,242,255,0.07); border:1px solid rgba(0,242,255,0.2)">
+                        <div class="fw-bold text-primary mb-2"><i class="fas fa-chart-bar me-1"></i> 필터링 기준</div>
+                        <ul class="mb-0 small text-muted" style="padding-left:1.2rem">
+                            <li>RSI(14) ≤ 30 → 과매도 (강력 매수 후보)</li>
+                            <li>RSI(14) 30~50 → 회복 구간 후보</li>
+                            <li>AI 점수 + RSI 보너스로 발굴 점수 산정</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="text-warning mb-2 mt-3">⚙️ 백테스트 방법론</h6>
+            <ul class="small text-muted" style="padding-left:1.2rem">
+                <li><strong>조건:</strong> 보유 차트 데이터에서 5일 내 5% 이상 하락 구간 탐색</li>
+                <li><strong>계산:</strong> 매수 시점 후 5거래일 보유 시 수익률 평균 산출</li>
+                <li><strong>출력:</strong> 평균 반등률(%), 승률(%), 샘플 수 표시</li>
+            </ul>
+
+            <h6 class="text-warning mb-2 mt-3">📊 SOXX 현황</h6>
+            <div id="semi-dip-algo-status" class="p-3 rounded-3" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08);">
+                <div class="text-muted small">데이터 로딩 중...</div>
+            </div>
+        `,
+        run: function (allStocks) {
+            if (typeof semiDipData === 'undefined') return [];
+
+            const sd = semiDipData;
+            const sox = sd.sox_analysis || {};
+            const stocks = sd.oversold_stocks || [];
+            const bt = sd.backtest_summary || [];
+
+            // SOXX 현황 패널 업데이트
+            const statusEl = document.getElementById('semi-dip-algo-status');
+            if (statusEl) {
+                const lvlColors = { NONE: '#28a745', MODERATE: '#ffc107', HIGH: '#fd7e14', EXTREME: '#dc3545' };
+                const triggered = sox.triggered;
+                const col = lvlColors[sox.trigger_level] || '#6c757d';
+                const drop = sox.drop_5d_pct != null ? sox.drop_5d_pct.toFixed(2) : '-';
+                const btHtml = bt.slice(0, 3).map(b => `
+                    <span class="badge me-1 mb-1" style="background:rgba(111,66,193,0.2);color:#a78bfa;border:1px solid rgba(111,66,193,0.3);">
+                        ${b.name}: 평균 ${b.avg_return_pct > 0 ? '+' : ''}${b.avg_return_pct}% (승률 ${b.win_rate_pct}%, n=${b.sample_count})
+                    </span>`).join('');
+                statusEl.innerHTML = `
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <span class="badge" style="background:${col}22;color:${col};border:1px solid ${col}44;font-size:0.9rem;padding:6px 14px;">
+                            ${triggered ? '[경보] ' : ''}SOXX 5일 낙폭: ${drop}% (기준: ${sd.drop_threshold_pct}%)
+                        </span>
+                        <span class="text-muted small">RSI 과매도 기준: ${sd.rsi_oversold_level}</span>
+                    </div>
+                    ${btHtml ? `<div class="small text-muted mb-1">백테스트 상위 종목:</div><div class="d-flex flex-wrap">${btHtml}</div>` : ''}
+                    <div class="text-muted small mt-2">갱신: ${sd.generated_at || '-'}</div>
+                `;
+            }
+
+            if (!stocks.length) return [];
+
+            // DB에서 해당 코드 찾아 discovery 형식으로 변환
+            const stockMap = {};
+            allStocks.forEach(s => { stockMap[s.code] = s; });
+
+            const results = [];
+            stocks.forEach((st, idx) => {
+                const dbStock = stockMap[st.code];
+                if (!dbStock) return;
+
+                const analysis = dbStock.analysis || {};
+                let change = 0;
+                const cd = dbStock.chart_data || [];
+                if (cd.length >= 2) {
+                    const last = cd[cd.length - 1].close || 0;
+                    const prev = cd[cd.length - 2].close || 0;
+                    if (prev > 0) change = ((last - prev) / prev) * 100;
+                }
+
+                const rsi = st.rsi;
+                const oversold = st.oversold;
+                const btAvg = st.backtest_avg_return;
+                const btWin = st.backtest_win_rate;
+
+                const techReasons = [`RSI: ${rsi != null ? rsi.toFixed(1) : '-'}${oversold ? ' (과매도)' : ''}`];
+                if (btAvg != null) techReasons.push(`백테스트 평균 반등: ${btAvg > 0 ? '+' : ''}${btAvg}%`);
+                if (sox.triggered) techReasons.push(`SOXX ${sox.drop_5d_pct?.toFixed(1)}% 급락 트리거`);
+
+                results.push({
+                    ...dbStock,
+                    ai_score: st.ai_score,
+                    per: st.per, pbr: st.pbr,
+                    change_rate: change,
+                    discovery_score: st.discovery_score,
+                    reasons: {
+                        fundamental: [
+                            st.per > 0 ? `PER ${st.per.toFixed(1)}배` : '',
+                            st.pbr > 0 ? `PBR ${st.pbr.toFixed(2)}배` : ''
+                        ].filter(Boolean),
+                        technical: techReasons,
+                        risk: [
+                            st.max_drawdown != null ? `MDD: ${st.max_drawdown}%` : '',
+                            sox.triggered ? `SOX 트리거 발동` : 'SOX 트리거 미발동'
+                        ].filter(Boolean)
+                    }
+                });
+            });
+
+            return results.sort((a, b) => b.discovery_score - a.discovery_score);
+        }
     }
 ];
+
 
 // ============================================================
 // 페이지 상태 관리

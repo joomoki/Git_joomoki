@@ -211,6 +211,30 @@ def run_geo_risk_model():
         traceback.print_exc()
 
 
+def run_pandemic_model():
+    """질병/팬데믹 모델 실행"""
+    print("\n=== 질병/팬데믹 모델 ===")
+    try:
+        from scripts.pandemic_model import run as pandemic_run
+        pandemic_run()
+    except Exception as e:
+        print(f"[WARN] 팬데믹 모델 실패 (선택 기능): {e}")
+        import traceback
+        traceback.print_exc()
+
+
+def run_semi_dip_model():
+    """반도체 SOX 급락 줍줍 모델 실행"""
+    print("\n=== 반도체 SOX 줍줍 모델 ===")
+    try:
+        from scripts.semi_dip_model import run as semi_run
+        semi_run()
+    except Exception as e:
+        print(f"[WARN] 반도체 줍줍 모델 실패 (선택 기능): {e}")
+        import traceback
+        traceback.print_exc()
+
+
 if __name__ == "__main__":
     db = StockDBManager()
     if not db.connect():
@@ -238,5 +262,11 @@ if __name__ == "__main__":
 
     # 6. 지정학적 리스크 모델
     run_geo_risk_model()
+
+    # 7. 질병/팬데믹 모델
+    run_pandemic_model()
+
+    # 8. 반도체 SOX 급락 줍줍 모델
+    run_semi_dip_model()
     
     print("\n=== 전체 작업 완료 ===")
