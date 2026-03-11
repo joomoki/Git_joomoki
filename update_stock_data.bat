@@ -29,20 +29,43 @@ if %errorlevel% neq 0 (
 
 echo.
 echo ==============================================
-echo [2/2] GitHub 원격 저장소에 데이터 푸시 중... (D:\DataStock)
-cd /d D:\DataStock
-git add .
-git commit -m "Auto update portal data"
-git push origin main
+echo [2/3] D:\joomoki_PJ 의 index.html 을 D:\DataStock 에 배포합니다...
 
+copy /Y D:\joomoki_PJ\index.html D:\DataStock\index.html
 if %errorlevel% neq 0 (
-    echo.
-    echo ❌ [오류] GitHub 푸시 중 오류가 발생했습니다.
+    echo ❌ [오류] index.html 복사 중 오류가 발생했습니다.
     goto end
 )
 
 echo.
-echo ✅ [성공] 모든 주식 데이터 최신화 및 GitHub 푸시 작업이 완료되었습니다!
+echo ==============================================
+echo [3/3] GitHub 원격 저장소에 데이터 푸시 중...
+echo ==============================================
+
+echo.
+echo [DataStock 저장소 푸시]
+cd /d D:\DataStock
+git add .
+git commit -m "Auto update portal data and UI"
+git push origin main
+if %errorlevel% neq 0 (
+    echo ❌ [오류] D:\DataStock GitHub 푸시 중 오류가 발생했습니다.
+    goto end
+)
+
+echo.
+echo [joomoki_PJ 저장소 푸시]
+cd /d D:\joomoki_PJ
+git add index.html update_stock_data.bat
+git commit -m "Update UI and deployment script"
+git push origin main
+if %errorlevel% neq 0 (
+    echo ❌ [오류] D:\joomoki_PJ GitHub 푸시 중 오류가 발생했습니다.
+    goto end
+)
+
+echo.
+echo ✅ [성공] 데이터 갱신, UI 배포, GitHub 푸시 작업이 모두 완료되었습니다!
 echo ==============================================
 :end
 echo.
