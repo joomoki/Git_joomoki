@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 추천 이력 분석 - JOOMOKI PRO</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Poppins:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS (Reusing existing style) -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js & Financial Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-brain me-2"></i>JOOMOKI PRO
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">대시보드</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#">추천 이력</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-section text-center" style="padding: 90px 0 30px;">
+        <div class="container">
+            <h2 class="hero-title mb-0">추천 이력 분석</h2>
+        </div>
+    </header>
+
+    <div class="container my-4">
+
+        <!-- Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="glass-card text-center py-3">
+                    <div class="text-muted small mb-1">총 추천 건수</div>
+                    <h4 class="text-white fw-bold mb-0" id="total-count">-</h4>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card text-center py-3">
+                    <div class="text-muted small mb-1">평균 수익률</div>
+                    <h4 class="text-white fw-bold mb-0" id="avg-return">-</h4>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card text-center py-3">
+                    <div class="text-muted small mb-1">적중률 (수익 > 0%)</div>
+                    <h4 class="text-white fw-bold mb-0" id="win-rate">-</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Chart & Table -->
+        <div class="glass-card">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <h4 class="text-white m-0"><i class="fas fa-history text-primary me-2"></i> 추천 이력 상세</h4>
+                <div class="d-flex gap-2 align-items-center">
+                    <button class="btn btn-outline-danger btn-sm" id="reset-stock-btn" style="display: none;"
+                        onclick="resetStockFilter()">
+                        <i class="fas fa-times me-1"></i> 종목 필터 해제
+                    </button>
+                    <select class="form-select bg-dark text-white border-secondary" id="date-select"
+                        style="width: auto;">
+                        <option value="all">전체 날짜</option>
+                        <!-- JS injected options -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="alert alert-secondary bg-dark text-light border-secondary mb-4 small">
+                <i class="fas fa-info-circle me-2 text-info"></i>
+                <strong>데이터 안내:</strong> 수익률은 <u>추천 당일 종가</u> 대비 경과 일자의 종가 기준 등락률입니다.
+                차트에는 추천일 다음 날부터 최대 10영업일 간의 데이터가 표시됩니다.
+                <br class="d-md-none">
+                <span class="ms-md-3"><i class="fas fa-mouse-pointer me-1 text-warning"></i> 차트의 막대를 클릭하면 해당 종목만 필터링하여 볼
+                    수 있습니다.</span>
+            </div>
+
+            <!-- Chart Section -->
+            <div id="chart-container" class="mb-5" style="display: none; height: 400px;">
+                <canvas id="return-chart"></canvas>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-dark-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th>추천일</th>
+                            <th>종목명 / 코드</th>
+                            <th>추천가 (Base)</th>
+                            <th>현재가</th>
+                            <th onclick="sortHistory('return')" style="cursor: pointer;">수익률 <i
+                                    class="fas fa-sort ms-1"></i></th>
+                            <th>AI 점수</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- JS injected -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Stock Detail -->
+    <div class="modal fade" id="stockModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content text-white">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold">
+                        <span id="modalStockName">종목 상세</span>
+                        <span id="modalPrice" class="ms-3 fs-6 text-warning"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs border-bottom-0 mb-3" id="stockModalTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button
+                                class="nav-link active text-white bg-transparent border-0 border-bottom border-2 border-primary"
+                                id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis" type="button"
+                                role="tab" aria-selected="true">AI 분석</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-white bg-transparent border-0" id="financial-tab"
+                                data-bs-toggle="tab" data-bs-target="#financial" type="button" role="tab"
+                                aria-selected="false">재무제표</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-white bg-transparent border-0" id="news-tab"
+                                data-bs-toggle="tab" data-bs-target="#news" type="button" role="tab"
+                                aria-selected="false">뉴스</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-white bg-transparent border-0" id="info-tab"
+                                data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab"
+                                aria-selected="false">기업 개요</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="stockModalTabContent">
+                        <!-- Analysis Tab -->
+                        <div class="tab-pane fade show active" id="analysis" role="tabpanel"
+                            aria-labelledby="analysis-tab">
+                            <p class="text-white mb-4" id="modalAnalysisSummary" style="line-height: 1.6;">분석 데이터 로딩
+                                중...</p>
+
+                            <!-- Detailed Chart -->
+                            <div class="mb-4" style="height: 300px;">
+                                <canvas id="detailChart"></canvas>
+                            </div>
+                            <h6 class="text-muted mb-3"><i class="fas fa-signal me-2"></i>투자 신호</h6>
+                            <ul class="list-group mb-3" id="modalSignals">
+                                <!-- Signals injected by JS -->
+                            </ul>
+                        </div>
+
+                        <!-- Financial Tab -->
+                        <div class="tab-pane fade" id="financial" role="tabpanel" aria-labelledby="financial-tab">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-striped table-hover rounded-3 overflow-hidden">
+                                    <tbody id="financial-table-body">
+                                        <!-- Financials injected by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- News Tab -->
+                        <div class="tab-pane fade" id="news" role="tabpanel" aria-labelledby="news-tab">
+                            <ul class="list-group list-group-flush" id="modalNewsList">
+                                <!-- News injected by JS -->
+                            </ul>
+                        </div>
+
+                        <!-- Info Tab -->
+                        <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="info-tab">
+                            <div class="p-3 bg-dark rounded-3"
+                                style="background-color: rgba(255,255,255,0.05) !important;">
+                                <h6 class="text-muted mb-3"><i class="fas fa-building me-2"></i>기업 개요</h6>
+                                <p class="text-white" id="modalDescription"
+                                    style="line-height: 1.7; white-space: pre-line;">기업 정보가 없습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1 small">
+                        <span class="text-muted">PER</span> <span id="modalPER">-</span>
+                    </div>
+                    <div class="d-flex justify-content-between small">
+                        <span class="text-muted">PBR</span> <span id="modalPBR">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-4 mt-5 border-top border-secondary text-muted small">
+        <p class="mb-0">&copy; 2026 JOOMOKI PRO. AI-Powered Analytics.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="data/stock_data_history.js"></script>
+    <script src="js/history.js"></script>
+</body>
+
+</html>
