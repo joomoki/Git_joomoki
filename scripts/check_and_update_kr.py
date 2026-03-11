@@ -199,6 +199,18 @@ def run_export():
         traceback.print_exc()
 
 
+def run_geo_risk_model():
+    """지정학적 리스크 모델 실행"""
+    print("\n=== 지정학적 리스크 모델 ===")
+    try:
+        from scripts.geo_risk_model import run as geo_run
+        geo_run()
+    except Exception as e:
+        print(f"[WARN] 지정학 리스크 모델 실패 (선택 기능): {e}")
+        import traceback
+        traceback.print_exc()
+
+
 if __name__ == "__main__":
     db = StockDBManager()
     if not db.connect():
@@ -223,5 +235,8 @@ if __name__ == "__main__":
 
     # 5. 웹 export
     run_export()
+
+    # 6. 지정학적 리스크 모델
+    run_geo_risk_model()
     
     print("\n=== 전체 작업 완료 ===")

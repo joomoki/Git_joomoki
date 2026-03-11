@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 
 <head>
@@ -29,6 +29,89 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Geo Risk Section Styles -->
+    <style>
+        .geo-assets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .geo-asset-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 14px 16px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .geo-asset-card:hover { transform: translateY(-2px); }
+        .asset-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            color: #adb5bd;
+        }
+        .asset-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'Inter', monospace;
+        }
+        .asset-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 0.78rem;
+        }
+        .asset-alert-bar {
+            position: absolute;
+            top: 0; left: 0;
+            width: 3px;
+            height: 100%;
+            border-radius: 10px 0 0 10px;
+        }
+        .geo-level-badge {
+            font-size: 0.65rem;
+            padding: 2px 7px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .geo-sectors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+        }
+        .geo-sector-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .geo-sector-header {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .geo-stock-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.15s;
+        }
+        .geo-stock-item:last-child { border-bottom: none; }
+        .geo-stock-item:hover { background: rgba(255,255,255,0.04); border-radius: 4px; }
+        .geo-sectors-wrapper { margin-top: 4px; }
+    </style>
 </head>
 
 <body>
@@ -66,6 +149,26 @@
     </header>
 
     <div class="container my-5" id="dashboard">
+
+        <!-- ═══ 지정학적 리스크 모니터 섹션 ═══ -->
+        <section id="geo-risk" class="mb-5">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 class="section-title text-white">
+                    <i class="fas fa-globe-asia" style="color:#fd7e14;"></i> 전쟁·지정학 리스크 모니터
+                </h2>
+                <span class="badge" style="background:rgba(253,126,20,0.15); color:#fd7e14; border:1px solid rgba(253,126,20,0.3); font-size:0.7rem;">
+                    <i class="fas fa-satellite-dish me-1"></i>실시간 2σ 감지
+                </span>
+            </div>
+            <div class="glass-card">
+                <div id="geo-risk-container">
+                    <div class="text-center py-4 text-muted" style="font-size:0.85rem;">
+                        <i class="fas fa-circle-notch fa-spin me-2"></i>지정학 리스크 데이터 로딩 중...
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Top Picks Section (AI Recommendations) -->
         <section id="top-picks" class="mb-5">
             <div class="d-flex align-items-center justify-content-between mb-4">
@@ -330,6 +433,9 @@
     <script src="data/stock_data_kr_8.js"></script>
     <script src="data/stock_data_kr_9.js"></script>
     <!-- STOCK_DATA_SCRIPTS_END -->
+    <!-- Geo Risk Data & Renderer -->
+    <script src="data/geo_risk_data.js"></script>
+    <script src="js/geo_risk.js"></script>
     <script src="js/app.js"></script>
 </body>
 
