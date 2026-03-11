@@ -42,11 +42,11 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link active" href="#dashboard">??쒕낫??/a></li>
-                    <li class="nav-item"><a class="nav-link" href="#market-list">?쒖옣</a></li>
-                    <li class="nav-item"><a class="nav-link" href="history.html">異붿쿇?대젰</a></li>
-                    <li class="nav-item"><a class="nav-link" href="discovery.html">?뵮 AI諛쒓뎬</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#education">媛?대뱶</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#dashboard">대시보드</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#market-list">시장</a></li>
+                    <li class="nav-item"><a class="nav-link" href="history.html">추천이력</a></li>
+                    <li class="nav-item"><a class="nav-link" href="discovery.html">🔬 AI발굴</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#education">가이드</a></li>
                 </ul>
             </div>
         </div>
@@ -54,13 +54,13 @@
 
     <header class="hero-section text-center">
         <div class="container">
-            <h1 class="hero-title">AI 湲곕컲 ?쒖옣 遺꾩꽍_</h1>
-            <div id="last-updated" class="badge badge-ai mb-4">?곗씠???낅뜲?댄듃 以?..</div>
+            <h1 class="hero-title">AI 기반 시장 분석_</h1>
+            <div id="last-updated" class="badge badge-ai mb-4">데이터 업데이트 중...</div>
             <div>
-                <a href="#market-list" class="btn btn-ai me-2">?쒖옣 ?먯깋?섍린 <i class="fas fa-arrow-right ms-2"></i></a>
-                <a href="history.html" class="btn btn-outline-light me-2">?뱤 異붿쿇 ?대젰 遺꾩꽍</a>
+                <a href="#market-list" class="btn btn-ai me-2">시장 탐색하기 <i class="fas fa-arrow-right ms-2"></i></a>
+                <a href="history.html" class="btn btn-outline-light me-2">📊 추천 이력 분석</a>
                 <a href="discovery.html" class="btn btn-outline-light"
-                    style="border-color: rgba(0,242,255,0.5); color: #00f2ff;">?뵮 AI二쇱떇諛쒓뎬</a>
+                    style="border-color: rgba(0,242,255,0.5); color: #00f2ff;">🔬 AI주식발굴</a>
             </div>
         </div>
     </header>
@@ -69,18 +69,18 @@
         <!-- Top Picks Section (AI Recommendations) -->
         <section id="top-picks" class="mb-5">
             <div class="d-flex align-items-center justify-content-between mb-4">
-                <h2 class="section-title text-white"><i class="fas fa-robot text-primary"></i> AI 媛뺣젰 留ㅼ닔 異붿쿇
+                <h2 class="section-title text-white"><i class="fas fa-robot text-primary"></i> AI 강력 매수 추천
                 </h2>
-                <span class="badge badge-ai">?믪? ?좊ː??/span>
+                <span class="badge badge-ai">높은 신뢰도</span>
             </div>
 
             <div class="row g-4" id="top-picks-container">
                 <!-- JS will inject cards here -->
                 <div class="col-12 text-center py-5">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">濡쒕뵫以?..</span>
+                        <span class="visually-hidden">로딩중...</span>
                     </div>
-                    <p class="mt-2 text-muted">?쒖옣 ?곗씠??遺꾩꽍 以?..</p>
+                    <p class="mt-2 text-muted">시장 데이터 분석 중...</p>
                 </div>
             </div>
         </section>
@@ -92,7 +92,7 @@
                     <div class="col-md-5">
                         <div class="d-flex flex-column flex-xl-row align-items-xl-end gap-2">
                             <h2 class="section-title m-0 text-white text-nowrap"><i
-                                    class="fas fa-globe text-secondary"></i> ?쒖옣 媛쒖슂</h2>
+                                    class="fas fa-globe text-secondary"></i> 시장 개요</h2>
                             <span id="market-dates-display" class="text-muted ms-xl-2"
                                 style="font-size: 0.85rem; padding-bottom: 2px;"></span>
                         </div>
@@ -103,14 +103,14 @@
                                 <input type="radio" class="btn-check" name="market-type" id="btn-domestic"
                                     autocomplete="off" checked>
                                 <label class="btn btn-outline-primary" for="btn-domestic">
-                                    援?궡 二쇱떇 <span id="count-domestic" class="badge bg-secondary ms-1">-</span>
+                                    국내 주식 <span id="count-domestic" class="badge bg-secondary ms-1">-</span>
                                 </label>
                             </div>
 
                             <div class="search-container">
                                 <i class="fas fa-search search-icon"></i>
                                 <input type="text" id="stats-search" class="search-input"
-                                    placeholder="醫낅ぉ肄붾뱶 ?먮뒗 醫낅ぉ紐?寃??..">
+                                    placeholder="종목코드 또는 종목명 검색...">
                             </div>
                         </div>
                     </div>
@@ -122,17 +122,17 @@
                     <table class="table table-dark-custom mb-0" id="stock-table">
                         <thead>
                             <tr>
-                                <th>醫낅ぉ紐?/ 肄붾뱶</th>
-                                <th onclick="handleSort('price')" style="cursor: pointer;">?꾩옱媛 <i id="sort-icon-price"
+                                <th>종목명 / 코드</th>
+                                <th onclick="handleSort('price')" style="cursor: pointer;">현재가 <i id="sort-icon-price"
                                         class="fas fa-sort ms-1" style="color: #6c757d;"></i></th>
-                                <th onclick="handleSort('change')" style="cursor: pointer;">?깅씫瑜?<i id="sort-icon-change"
+                                <th onclick="handleSort('change')" style="cursor: pointer;">등락률 <i id="sort-icon-change"
                                         class="fas fa-sort ms-1" style="color: #6c757d;"></i></th>
-                                <th onclick="handleSort('signal')" style="cursor: pointer;">?좏샇 <i id="sort-icon-signal"
+                                <th onclick="handleSort('signal')" style="cursor: pointer;">신호 <i id="sort-icon-signal"
                                         class="fas fa-sort ms-1" style="color: #6c757d;"></i></th>
-                                <th onclick="handleSort('score')" style="cursor: pointer;">AI ?먯닔 <i id="sort-icon-score"
+                                <th onclick="handleSort('score')" style="cursor: pointer;">AI 점수 <i id="sort-icon-score"
                                         class="fas fa-sort ms-1" style="color: #6c757d;"></i></th>
-                                <th>吏??/th>
-                                <th>異붿꽭 (30??</th>
+                                <th>지표</th>
+                                <th>추세 (30일)</th>
                             </tr>
                         </thead>
                         <tbody id="stock-list-body">
@@ -149,25 +149,26 @@
 
         <!-- Education Section -->
         <section id="education" class="mb-5">
-            <h2 class="section-title text-white mb-4"><i class="fas fa-lightbulb text-warning"></i> ?ъ옄 ?몄궗?댄듃</h2>
+            <h2 class="section-title text-white mb-4"><i class="fas fa-lightbulb text-warning"></i> 투자 인사이트</h2>
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="glass-card h-100">
-                        <h5 class="fw-bold text-primary mb-3"><i class="fas fa-chart-pie me-2"></i> PER (二쇨??섏씡鍮꾩쑉)</h5>
-                        <p class="text-muted small">二쇨?瑜?二쇰떦?쒖씠?듭쑝濡??섎늿 媛믪엯?덈떎. ??쓣?섎줉 ??됯??섏뼱 ?덉쓣 媛?μ꽦???믪뒿?덈떎. ?숈쥌 ?낃퀎 ?됯퇏怨?鍮꾧탳?대낫?몄슂.</p>
+                        <h5 class="fw-bold text-primary mb-3"><i class="fas fa-chart-pie me-2"></i> PER (주가수익비율)</h5>
+                        <p class="text-muted small">주가를 주당순이익으로 나눈 값입니다. 낮을수록 저평가되어 있을 가능성이 높습니다. 동종 업계 평균과 비교해보세요.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="glass-card h-100">
-                        <h5 class="fw-bold text-secondary mb-3"><i class="fas fa-wave-square me-2"></i> RSI (?곷?媛뺣룄吏??
+                        <h5 class="fw-bold text-secondary mb-3"><i class="fas fa-wave-square me-2"></i> RSI (상대강도지수)
                         </h5>
-                        <p class="text-muted small">怨쇰ℓ??怨쇰ℓ??援ш컙???먮떒?섎뒗 吏?쒖엯?덈떎. 70 ?댁긽?대㈃ 怨쇰ℓ??留ㅻ룄 怨좊젮), 30 ?댄븯?대㈃ 怨쇰ℓ??留ㅼ닔 湲고쉶)濡?                            ?댁꽍?⑸땲??</p>
+                        <p class="text-muted small">과매수/과매도 구간을 판단하는 지표입니다. 70 이상이면 과매수(매도 고려), 30 이하이면 과매도(매수 기회)로
+                            해석합니다.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="glass-card h-100">
-                        <h5 class="fw-bold text-success mb-3"><i class="fas fa-robot me-2"></i> AI ?먯닔</h5>
-                        <p class="text-muted small">湲곗닠??吏??MACD, 蹂쇰┛? 諛대뱶 ??? ??붾찘???곗씠?곕? 醫낇빀?섏뿬 AI媛 ?곗텧???ъ옄 留ㅻ젰???먯닔?낅땲??</p>
+                        <h5 class="fw-bold text-success mb-3"><i class="fas fa-robot me-2"></i> AI 점수</h5>
+                        <p class="text-muted small">기술적 지표(MACD, 볼린저 밴드 등)와 펀더멘털 데이터를 종합하여 AI가 산출한 투자 매력도 점수입니다.</p>
                     </div>
                 </div>
             </div>
@@ -180,7 +181,7 @@
             <div class="modal-content text-white">
                 <div class="modal-header border-bottom-0">
                     <h5 class="modal-title fw-bold">
-                        <span id="modalStockName">醫낅ぉ ?곸꽭</span>
+                        <span id="modalStockName">종목 상세</span>
                         <span id="modalPrice" class="ms-3 fs-6 text-warning"></span>
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
@@ -193,22 +194,22 @@
                             <button
                                 class="nav-link active text-white bg-transparent border-0 border-bottom border-2 border-primary"
                                 id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis" type="button"
-                                role="tab" aria-selected="true">AI 遺꾩꽍</button>
+                                role="tab" aria-selected="true">AI 분석</button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link text-white bg-transparent border-0" id="financial-tab"
                                 data-bs-toggle="tab" data-bs-target="#financial" type="button" role="tab"
-                                aria-selected="false">?щТ?쒗몴</button>
+                                aria-selected="false">재무제표</button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link text-white bg-transparent border-0" id="news-tab"
                                 data-bs-toggle="tab" data-bs-target="#news" type="button" role="tab"
-                                aria-selected="false">?댁뒪</button>
+                                aria-selected="false">뉴스</button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link text-white bg-transparent border-0" id="info-tab"
                                 data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab"
-                                aria-selected="false">湲곗뾽 媛쒖슂</button>
+                                aria-selected="false">기업 개요</button>
                         </li>
                     </ul>
 
@@ -216,14 +217,14 @@
                         <!-- Analysis Tab -->
                         <div class="tab-pane fade show active" id="analysis" role="tabpanel"
                             aria-labelledby="analysis-tab">
-                            <p class="text-white mb-4" id="modalAnalysisSummary" style="line-height: 1.6;">遺꾩꽍 ?곗씠??濡쒕뵫
-                                以?..</p>
+                            <p class="text-white mb-4" id="modalAnalysisSummary" style="line-height: 1.6;">분석 데이터 로딩
+                                중...</p>
 
                             <!-- Detailed Chart -->
                             <div class="mb-4" style="height: 300px;">
                                 <canvas id="detailChart"></canvas>
                             </div>
-                            <h6 class="text-muted mb-3"><i class="fas fa-signal me-2"></i>?ъ옄 ?좏샇</h6>
+                            <h6 class="text-muted mb-3"><i class="fas fa-signal me-2"></i>투자 신호</h6>
                             <ul class="list-group mb-3" id="modalSignals">
                                 <!-- Signals injected by JS -->
                             </ul>
@@ -251,9 +252,9 @@
                         <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="info-tab">
                             <div class="p-3 bg-dark rounded-3"
                                 style="background-color: rgba(255,255,255,0.05) !important;">
-                                <h6 class="text-muted mb-3"><i class="fas fa-building me-2"></i>湲곗뾽 媛쒖슂</h6>
+                                <h6 class="text-muted mb-3"><i class="fas fa-building me-2"></i>기업 개요</h6>
                                 <p class="text-white" id="modalDescription"
-                                    style="line-height: 1.7; white-space: pre-line;">湲곗뾽 ?뺣낫媛 ?놁뒿?덈떎.</p>
+                                    style="line-height: 1.7; white-space: pre-line;">기업 정보가 없습니다.</p>
                             </div>
                         </div>
                     </div>
@@ -275,35 +276,36 @@
     <div class="container mb-5">
         <section id="system-info">
             <div class="glass-card p-4">
-                <h4 class="text-white mb-4"><i class="fas fa-server text-info me-2"></i> ?쒖뒪???뺣낫 & ?곗씠??異쒖쿂</h4>
+                <h4 class="text-white mb-4"><i class="fas fa-server text-info me-2"></i> 시스템 정보 & 데이터 출처</h4>
                 <div class="row g-4">
                     <div class="col-md-4">
-                        <h6 class="text-primary fw-bold"><i class="fas fa-database me-2"></i>?곗씠???섏쭛</h6>
+                        <h6 class="text-primary fw-bold"><i class="fas fa-database me-2"></i>데이터 수집</h6>
                         <p class="text-muted small">
-                            蹂??쒕퉬?ㅻ뒗 <strong>Python 諛깃렇?쇱슫???ㅽ겕由쏀듃</strong>媛 24?쒓컙 媛?숇릺硫??ㅼ떆媛꾩뿉 媛源앷쾶 ?곗씠?곕? ?섏쭛?⑸땲??<br><br>
-                            <span class="d-block">??<strong>援?궡 二쇱떇:</strong> Naver Finance (?щ·留? / KIS API</span>
+                            본 서비스는 <strong>Python 백그라운드 스크립트</strong>가 24시간 가동되며 실시간에 가깝게 데이터를 수집합니다.<br><br>
+                            <span class="d-block">• <strong>국내 주식:</strong> Naver Finance (크롤링) / KIS API</span>
                         </p>
                     </div>
                     <div class="col-md-4">
-                        <h6 class="text-success fw-bold"><i class="fas fa-brain me-2"></i>AI ?먯닔 ?곗텧 ?뚭퀬由ъ쬁</h6>
+                        <h6 class="text-success fw-bold"><i class="fas fa-brain me-2"></i>AI 점수 산출 알고리즘</h6>
                         <p class="text-muted small">
-                            湲곗닠??湲곕낯??遺꾩꽍 吏?쒕? 醫낇빀?섏뿬 0~100?먯쓽 ?ъ옄 留ㅻ젰?꾨? ?곗텧?⑸땲??<br><br>
-                            <span class="d-block mb-1">??<strong>湲곗닠??遺꾩꽍:</strong> RSI, ?대룞?됯퇏??MA) ?섎졃/?뺤궛, MACD, 蹂쇰┛? 諛대뱶
-                                ?꾩튂</span>
-                            <span class="d-block">??<strong>湲곕낯??遺꾩꽍:</strong> PER, PBR, EPS ?깆옣瑜?媛以묒튂 ?곸슜</span>
+                            기술적/기본적 분석 지표를 종합하여 0~100점의 투자 매력도를 산출합니다.<br><br>
+                            <span class="d-block mb-1">• <strong>기술적 분석:</strong> RSI, 이동평균선(MA) 수렴/확산, MACD, 볼린저 밴드
+                                위치</span>
+                            <span class="d-block">• <strong>기본적 분석:</strong> PER, PBR, EPS 성장률 가중치 적용</span>
                         </p>
                     </div>
                     <div class="col-md-4">
-                        <h6 class="text-warning fw-bold"><i class="fas fa-network-wired me-2"></i>?쒖뒪??援ъ“</h6>
+                        <h6 class="text-warning fw-bold"><i class="fas fa-network-wired me-2"></i>시스템 구조</h6>
                         <p class="text-muted small">
-                            ?곗씠?곕뒗 <strong>PostgreSQL DB</strong>????λ릺硫? 二쇨린?곸쑝濡?<strong>?뺤쟻 ???뚯씪(JS)</strong>濡?蹂?섎릺??                            諛고룷?⑸땲??<br><br>
-                            ?ъ슜?먮뒗 蹂꾨룄???쒕쾭 ?붿껌 ?湲??쒓컙 ?놁씠, 理쒖쟻?붾맂 ?뺤쟻 ?뚯씪???듯빐 利됱떆 ?곗씠?곕? 議고쉶?????덉뒿?덈떎.
+                            데이터는 <strong>PostgreSQL DB</strong>에 저장되며, 주기적으로 <strong>정적 웹 파일(JS)</strong>로 변환되어
+                            배포됩니다.<br><br>
+                            사용자는 별도의 서버 요청 대기 시간 없이, 최적화된 정적 파일을 통해 즉시 데이터를 조회할 수 있습니다.
                         </p>
                     </div>
                 </div>
                 <div class="mt-3 pt-3 border-top border-secondary">
-                    <p class="text-muted small mb-0"><i class="fas fa-check-circle text-success me-1"></i> ?꾩옱 ?쒖뒪???곹깭:
-                        <strong>?뺤긽 媛??以?/strong> (?곗씠???먮룞 媛깆떊)
+                    <p class="text-muted small mb-0"><i class="fas fa-check-circle text-success me-1"></i> 현재 시스템 상태:
+                        <strong>정상 가동 중</strong> (데이터 자동 갱신)
                     </p>
                 </div>
             </div>
